@@ -3,105 +3,49 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🌸 名古屋・京都 8日遊 (全功能同步版)</title>
+<title>🌸 名古屋・京都 8日遊 (修復版)</title>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <style>
-  /* 這裡我保留了你最初提供的所有精美 CSS 樣式 */
-  :root {
-    --washi: #FDF6EC; --botan: #9B4B6B; --botan-dk: #6E2E49; --botan-lt: #F5D0DF;
-    --take: #4A7C59; --take-lt: #D6EAD9; --shu: #C8714A; --kon: #2C4A6E;
-    --kon-lt: #D0DCF0; --kin: #C8A84B; --kin-lt: #FBF1D3; --text: #3D2B1F;
-    --text-mid: #6B5044; --border: #E8D5C4; --shadow: rgba(61,43,31,0.12);
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Hiragino Sans', 'Noto Sans TC', sans-serif; background: var(--washi); color: var(--text); }
-  .app-header { background: linear-gradient(135deg, var(--botan-dk), var(--botan)); color: white; padding: 20px 20px 10px; position: sticky; top: 0; z-index: 100; }
-  .tab-bar { display: flex; background: var(--botan-dk); border-top: 1px solid rgba(255,255,255,0.2); }
-  .tab-btn { flex: 1; padding: 12px 5px; border: none; background: transparent; color: rgba(255,255,255,0.6); font-size: 0.75rem; cursor: pointer; }
-  .tab-btn.active { color: white; border-bottom: 3px solid var(--kin); }
-  .panel { display: none; padding: 16px; animation: fadeIn 0.3s ease; }
+  :root { --washi: #FDF6EC; --botan: #9B4B6B; --botan-dk: #6E2E49; --text: #3D2B1F; --border: #E8D5C4; --kin: #C8A84B; }
+  body { font-family: sans-serif; background: var(--washi); color: var(--text); margin: 0; padding-bottom: 60px; }
+  .app-header { background: var(--botan-dk); color: white; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 100; }
+  .tab-bar { display: flex; background: var(--botan); position: sticky; top: 60px; z-index: 99; }
+  .tab-btn { flex: 1; padding: 12px; border: none; background: transparent; color: white; opacity: 0.7; font-size: 0.8rem; }
+  .tab-btn.active { opacity: 1; border-bottom: 3px solid var(--kin); font-weight: bold; }
+  .panel { display: none; padding: 15px; }
   .panel.active { display: block; }
-  .panel-scroll { max-height: calc(100dvh - 130px); overflow-y: auto; padding-bottom: 50px; }
-  @keyframes fadeIn { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
-  .card { background: white; border-radius: 14px; border: 1px solid var(--border); margin-bottom: 15px; overflow: hidden; box-shadow: 0 2px 12px var(--shadow); }
-  .card-header { padding: 15px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-  .day-badge { background: var(--botan); color: white; padding: 4px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: bold; }
-  .timeline { padding: 15px; border-top: 1px solid var(--border); }
-  .tl-item { margin-bottom: 15px; padding-left: 15px; border-left: 2px solid var(--botan-lt); position: relative; }
-  /* 編輯效果 */
-  .editable:hover { background: #FFF9C4; cursor: pointer; border-radius: 4px; }
-  .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: var(--text); color: white; padding: 10px 20px; border-radius: 20px; font-size: 0.8rem; display: none; z-index: 1000; }
-  /* 匯率、翻譯等原本的樣式... (略，建議補回你最初的 CSS) */
-  .currency-hero { background: var(--kon); color: white; padding: 20px; border-radius: 16px; text-align: center; margin-bottom: 15px; }
-  .quick-tile { background: white; border: 1px solid var(--border); border-radius: 14px; padding: 15px; text-align: center; }
+  .card { background: white; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 15px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+  .day-badge { background: var(--botan); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; margin-right: 5px; }
+  .tl-item { margin-top: 10px; padding-left: 10px; border-left: 2px solid var(--border); }
+  .editable:hover { background: #FFF9C4; cursor: pointer; }
+  input { width: 100%; padding: 8px; margin: 5px 0; border: 1px solid var(--botan); border-radius: 4px; }
+  .status-tag { font-size: 0.7rem; background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 10px; }
 </style>
 </head>
 <body>
 
 <div class="app-header">
-  <div style="display:flex; justify-content:space-between; align-items:center;">
-    <div>
-      <div style="font-size:1.2rem; font-weight:bold;">🌸 名古屋・京都 8日遊</div>
-      <div style="font-size:0.75rem; opacity:0.8;">雲端即時同步模式 ✦ <span id="sync-status">連線中...</span></div>
-    </div>
-    <div style="font-size:1.5rem;">⛩️</div>
-  </div>
+  <div style="font-size: 1.1rem; font-weight: bold;">🌸 名古屋・京都 8日遊</div>
+  <span id="sync-status" class="status-tag">📡 連線中...</span>
 </div>
 
 <div class="tab-bar">
   <button class="tab-btn active" onclick="switchTab('itinerary')">🗓 行程</button>
   <button class="tab-btn" onclick="switchTab('currency')">💴 匯率</button>
   <button class="tab-btn" onclick="switchTab('map')">🗺 地圖</button>
-  <button class="tab-btn" onclick="switchTab('translate')">🈳 翻譯</button>
 </div>
 
-<div class="panel active panel-scroll" id="panel-itinerary">
-  <div id="itinerary-content">載入雲端行程中...</div>
+<div class="panel active" id="panel-itinerary">
+  <div id="itinerary-content">正在讀取雲端資料，請稍候...</div>
 </div>
 
-<div class="panel panel-scroll" id="panel-currency">
-  <div class="currency-hero">
-    <div>新台幣 ↔ 日圓</div>
-    <div style="font-size:2rem; font-weight:800;">1 TWD = 4.62 JPY</div>
-  </div>
-  <div class="quick-tile">💡 匯率換算功能已就緒</div>
-</div>
-
-<div class="panel panel-scroll" id="panel-map">
-  <div class="quick-tile">🗺 地圖搜尋功能已就緒</div>
-</div>
-
-<div class="panel panel-scroll" id="panel-translate">
-  <div class="quick-tile">🈳 旅遊翻譯功能已就緒</div>
-</div>
-
-<div id="toast" class="toast"></div>
+<div class="panel" id="panel-currency"><div class="card">💴 匯率換算功能 (1 TWD = 4.62 JPY)</div></div>
+<div class="panel" id="panel-map"><div class="card">🗺 地圖與常用地址</div></div>
 
 <script>
-// Firebase 配置
 const firebaseConfig = {
   apiKey: "AIzaSyCx7tiaTjllBPkUKWenWzKWPzI2mHPn-n4",
   authDomain: "nagoya-61411.firebaseapp.com",
-  databaseURL: "https://nagoya-61411-default-rtdb.firebaseio.com",
-  projectId: "nagoya-61411",
-  storageBucket: "nagoya-61411.firebasestorage.app",
-  messagingSenderId: "155342877572",
-  appId: "1:155342877572:web:c22e8cee64ef44ecebe3d1"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-// 監聽行程
-db.ref('itinerary').on('value', (snapshot) => {
-  const data = snapshot.val();
-  if (data) {
-    renderItinerary(data);
-    document.getElementById('sync-status').innerText = "已連線";
-  }
-});
-
-function renderItinerary(itinerary) {
-  const container = document.getElementById('
+  databaseURL: "https://
